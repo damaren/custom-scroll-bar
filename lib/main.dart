@@ -52,6 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildList() {
     //print("context height: " + context.size.height.toString() + "\n");
     return ListView(
+
+      controller: ScrollController(),
       children: <Widget>[
         ListTile(
           title: Text("item 1"),
@@ -127,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class CustomScrollBar extends StatefulWidget {
-  final Widget child;
+  final ListView child;
   final double scrollBarHeight;
 
   CustomScrollBar({this.child, this.scrollBarHeight});
@@ -139,6 +141,7 @@ class CustomScrollBar extends StatefulWidget {
 class CustomScrollBarState extends State<CustomScrollBar> {
   double get _minScrollBarOffset => 0.0;
   double get _maxScrollBarOffset => context.size.height - widget.scrollBarHeight;
+  double get _maxScrollExtent => widget.child.controller.position.maxScrollExtent;
   double _scrollBarOffset = 0.0;
 
   void scrollBarUpdate(DragUpdateDetails details) {
@@ -150,6 +153,15 @@ class CustomScrollBarState extends State<CustomScrollBar> {
     if(_scrollBarOffset > _maxScrollBarOffset) {
       _scrollBarOffset = _maxScrollBarOffset;
     }
+
+    double newControllerPosition = (_scrollBarOffset*_maxScrollExtent)/_maxScrollBarOffset;
+
+    widget.child.controller.position.jumpTo(newControllerPosition);
+
+    //print("context.size.height: " + context.size.height.toString() + "\n\n");
+
+//    print("child.controller.offset: " + widget.child.controller.offset.toString() + "\n\n");
+
     setState(() {});
   }
 
@@ -164,6 +176,7 @@ class CustomScrollBarState extends State<CustomScrollBar> {
             height: widget.scrollBarHeight,
             width: 12.0,
             margin: EdgeInsets.only(top: _scrollBarOffset),
+            padding: EdgeInsets.only(left: 5.0),
           )),
     ]);
   }
