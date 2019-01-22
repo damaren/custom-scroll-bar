@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
+  final ScrollController controller = ScrollController();
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -19,13 +22,13 @@ class MyApp extends StatelessWidget {
         // counter didn't reset back to zero; the application is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Custom Scrollbar test app'),
+      home: MyHomePage(title: 'Custom Scrollbar test app', controller: controller),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key key, this.title, this.controller}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -37,6 +40,7 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  final ScrollController controller;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -53,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //print("context height: " + context.size.height.toString() + "\n");
     return ListView(
 
-      controller: ScrollController(),
+      controller: widget.controller,
       children: <Widget>[
         ListTile(
           title: Text("item 1"),
@@ -121,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         alignment: Alignment.topRight,
         children: <Widget>[
-          CustomScrollBar(child: _buildList(), scrollBarHeight: 35.0,),
+          CustomScrollBar(child: _buildList(), scrollBarHeight: 35.0, controller: widget.controller,),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
@@ -131,8 +135,9 @@ class _MyHomePageState extends State<MyHomePage> {
 class CustomScrollBar extends StatefulWidget {
   final ListView child;
   final double scrollBarHeight;
+  final ScrollController controller;
 
-  CustomScrollBar({this.child, this.scrollBarHeight});
+  CustomScrollBar({this.child, this.scrollBarHeight, this.controller});
 
   @override
   State createState() => new CustomScrollBarState();
@@ -141,7 +146,7 @@ class CustomScrollBar extends StatefulWidget {
 class CustomScrollBarState extends State<CustomScrollBar> {
   double get _minScrollBarOffset => 0.0;
   double get _maxScrollBarOffset => context.size.height - widget.scrollBarHeight;
-  double get _maxScrollExtent => widget.child.controller.position.maxScrollExtent;
+  double get _maxScrollExtent => widget.controller.position.maxScrollExtent;
   double _scrollBarOffset = 0.0;
 
   void scrollBarUpdate(DragUpdateDetails details) {
@@ -156,7 +161,15 @@ class CustomScrollBarState extends State<CustomScrollBar> {
 
     double newControllerPosition = (_scrollBarOffset*_maxScrollExtent)/_maxScrollBarOffset;
 
-    widget.child.controller.position.jumpTo(newControllerPosition);
+    widget.controller.position.jumpTo(newControllerPosition);
+
+//    print("widget.controller: " + widget.controller.toString() + "\n\n");
+//
+//    print("widget.controller.position: " + widget.controller.position.toString() + "\n\n");
+//
+//    print("widget.child.controller: " + widget.child.controller.toString() + "\n\n");
+//
+//    print("widget.child.controller.position: " + widget.child.controller.position.toString() + "\n\n");
 
     //print("context.size.height: " + context.size.height.toString() + "\n\n");
 
