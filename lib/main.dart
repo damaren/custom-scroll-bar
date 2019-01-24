@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     _listView = _buildList();
 
-    print("_listView.controller: " + _listView.controller.toString() + "\n");
+    //print("_listView.controller: " + _listView.controller.toString() + "\n");
     //print("_listView.controller.position: " + _listView.controller.position.toString() + "\n");
 
     //print("My home page context height: " + context.size.height.toString() + "\n");
@@ -160,8 +160,10 @@ class CustomScrollBarState extends State<CustomScrollBar> {
   double get _minScrollBarOffset => 0.0;
   double get _maxScrollBarOffset =>
       context.size.height - widget.scrollBarHeight;
+  double get _minScrollExtent => 0.0;
   double get _maxScrollExtent => widget.controller.position.maxScrollExtent;
   double _scrollBarOffset = 0.0;
+  double _listViewOffset = 0.0;
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     //print(details.delta.toString() + "\n\n");
@@ -173,15 +175,15 @@ class CustomScrollBarState extends State<CustomScrollBar> {
       _scrollBarOffset = _maxScrollBarOffset;
     }
 
-    double newControllerPosition =
+    _listViewOffset =
         (_scrollBarOffset * _maxScrollExtent) / _maxScrollBarOffset;
 
-    widget.controller.position.jumpTo(newControllerPosition);
+    widget.controller.position.jumpTo(_listViewOffset);
 
     setState(() {});
   }
 
-  changePosition(ScrollNotification notification) {
+  _onNotification(ScrollNotification notification) {
     //if notification was fired when user drags we don't need to update scrollThumb position
     if (_isDragInProcess) {
       return;
@@ -189,26 +191,17 @@ class CustomScrollBarState extends State<CustomScrollBar> {
 
     setState(() {
       if (notification is ScrollUpdateNotification) {
-        _barOffset += getBarDelta(
-          notification.scrollDelta,
-          barMaxScrollExtent,
-          viewMaxScrollExtent,
-        );
 
-        if (_barOffset < barMinScrollExtent) {
-          _barOffset = barMinScrollExtent;
+        _listViewOffset += notification.scrollDelta;
+
+        if(_listViewOffset < _minScrollExtent) {
+          _listViewOffset = _minScrollExtent;
         }
-        if (_barOffset > barMaxScrollExtent) {
-          _barOffset = barMaxScrollExtent;
+        if(_listViewOffset > _maxScrollExtent) {
+          _listViewOffset = _maxScrollExtent;
         }
 
-        _viewOffset += notification.scrollDelta;
-        if (_viewOffset < widget.controller.position.minScrollExtent) {
-          _viewOffset = widget.controller.position.minScrollExtent;
-        }
-        if (_viewOffset > viewMaxScrollExtent) {
-          _viewOffset = viewMaxScrollExtent;
-        }
+        _scrollBarOffset = (_listViewOffset*_maxScrollBarOffset)/_maxScrollExtent;
       }
     });
   }
@@ -224,7 +217,9 @@ class CustomScrollBarState extends State<CustomScrollBar> {
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-        onNotification: changePosition,
+        onNotification: (ScrollNotification notification) {
+          _onNotification(notification);
+        },
         child: Stack(alignment: Alignment.topRight, children: <Widget>[
           widget.child,
           GestureDetector(
