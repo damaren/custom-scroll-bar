@@ -154,9 +154,7 @@ class CustomScrollBar extends StatefulWidget {
 }
 
 class CustomScrollBarState extends State<CustomScrollBar> {
-
   bool _isDragInProcess = false;
-
   double get _minScrollBarOffset => 0.0;
   double get _maxScrollBarOffset =>
       context.size.height - widget.scrollBarHeight;
@@ -165,9 +163,13 @@ class CustomScrollBarState extends State<CustomScrollBar> {
   double _scrollBarOffset = 0.0;
   double _listViewOffset = 0.0;
 
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    //print(details.delta.toString() + "\n\n");
+  // called when the scrollbar has been dragged
+  _onVerticalDragUpdate(DragUpdateDetails details) {
+
+    // update the scroll bar offset according to the drag
     _scrollBarOffset += details.delta.dy;
+
+    // don't allow the scroll bar offset to be outside the limits
     if (_scrollBarOffset < _minScrollBarOffset) {
       _scrollBarOffset = _minScrollBarOffset;
     }
@@ -175,16 +177,20 @@ class CustomScrollBarState extends State<CustomScrollBar> {
       _scrollBarOffset = _maxScrollBarOffset;
     }
 
+    // calculate the list view offset according to the formula (listViewOffset/masScrollExtent=scrollBarOffset/maxScrollBarOffset)
     _listViewOffset =
         (_scrollBarOffset * _maxScrollExtent) / _maxScrollBarOffset;
 
+    // update the list view's position
     widget.controller.position.jumpTo(_listViewOffset);
 
     setState(() {});
   }
 
+  // called when the listview has been scrolled
   _onNotification(ScrollNotification notification) {
-    //if notification was fired when user drags we don't need to update scrollThumb position
+
+    // dragging the scrollbar will trigger a movement in the listview, and thus _onNotification will be called. In that case, _onNotification should return without doing anything.
     if (_isDragInProcess) {
       return;
     }
@@ -192,8 +198,10 @@ class CustomScrollBarState extends State<CustomScrollBar> {
     setState(() {
       if (notification is ScrollUpdateNotification) {
 
+        // update the list view offset according to the scroll
         _listViewOffset += notification.scrollDelta;
 
+        // dont't allow the list view offset to be outside the limits
         if(_listViewOffset < _minScrollExtent) {
           _listViewOffset = _minScrollExtent;
         }
@@ -201,6 +209,7 @@ class CustomScrollBarState extends State<CustomScrollBar> {
           _listViewOffset = _maxScrollExtent;
         }
 
+        // calculate the scroll bar offset according to the formula (listViewOffset/masScrollExtent=scrollBarOffset/maxScrollBarOffset)
         _scrollBarOffset = (_listViewOffset*_maxScrollBarOffset)/_maxScrollExtent;
       }
     });
