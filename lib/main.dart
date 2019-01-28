@@ -60,57 +60,19 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
+  Widget _buildRow(int index) {
+    return ListTile(
+      title: Text("item " + index.toString()),
+    );
+  }
+
   Widget _buildList() {
     //print("context height: " + context.size.height.toString() + "\n");
-    return ListView(
+    return ListView.builder(
       controller: widget.controller,
-      children: <Widget>[
-        ListTile(
-          title: Text("item 1"),
-        ),
-        ListTile(
-          title: Text("item 2"),
-        ),
-        ListTile(
-          title: Text("item 3"),
-        ),
-        ListTile(
-          title: Text("item 4"),
-        ),
-        ListTile(
-          title: Text("item 5"),
-        ),
-        ListTile(
-          title: Text("item 6"),
-        ),
-        ListTile(
-          title: Text("item 7"),
-        ),
-        ListTile(
-          title: Text("item 8"),
-        ),
-        ListTile(
-          title: Text("item 9"),
-        ),
-        ListTile(
-          title: Text("item 10"),
-        ),
-        ListTile(
-          title: Text("item 11"),
-        ),
-        ListTile(
-          title: Text("item 12"),
-        ),
-        ListTile(
-          title: Text("item 13"),
-        ),
-        ListTile(
-          title: Text("item 14"),
-        ),
-        ListTile(
-          title: Text("item 15"),
-        ),
-      ],
+      itemBuilder: (BuildContext context, int index) {
+        return _buildRow(index);
+      },
     );
   }
 
@@ -165,7 +127,6 @@ class CustomScrollBarState extends State<CustomScrollBar> {
 
   // called when the scrollbar has been dragged
   _onVerticalDragUpdate(DragUpdateDetails details) {
-
     // update the scroll bar offset according to the drag
     _scrollBarOffset += details.delta.dy;
 
@@ -189,7 +150,6 @@ class CustomScrollBarState extends State<CustomScrollBar> {
 
   // called when the listview has been scrolled
   _onNotification(ScrollNotification notification) {
-
     // dragging the scrollbar will trigger a movement in the listview, and thus _onNotification will be called. In that case, _onNotification should return without doing anything.
     if (_isDragInProcess) {
       return;
@@ -197,20 +157,20 @@ class CustomScrollBarState extends State<CustomScrollBar> {
 
     setState(() {
       if (notification is ScrollUpdateNotification) {
-
         // update the list view offset according to the scroll
         _listViewOffset += notification.scrollDelta;
 
         // dont't allow the list view offset to be outside the limits
-        if(_listViewOffset < _minScrollExtent) {
+        if (_listViewOffset < _minScrollExtent) {
           _listViewOffset = _minScrollExtent;
         }
-        if(_listViewOffset > _maxScrollExtent) {
+        if (_listViewOffset > _maxScrollExtent) {
           _listViewOffset = _maxScrollExtent;
         }
 
         // calculate the scroll bar offset according to the formula (listViewOffset/masScrollExtent=scrollBarOffset/maxScrollBarOffset)
-        _scrollBarOffset = (_listViewOffset*_maxScrollBarOffset)/_maxScrollExtent;
+        _scrollBarOffset =
+            (_listViewOffset * _maxScrollBarOffset) / _maxScrollExtent;
       }
     });
   }
