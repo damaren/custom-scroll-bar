@@ -47,35 +47,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  ListView _listView;
-
-  @override
-  void initState() {
-    _listView = _buildList();
-
-    //print("_listView.controller: " + _listView.controller.toString() + "\n");
-    //print("_listView.controller.position: " + _listView.controller.position.toString() + "\n");
-
-    //print("My home page context height: " + context.size.height.toString() + "\n");
-    super.initState();
-  }
-
-  Widget _buildRow(int index) {
-    return ListTile(
-      title: Text("item " + index.toString()),
-    );
-  }
-
-  Widget _buildList() {
-    //print("context height: " + context.size.height.toString() + "\n");
-    return ListView.builder(
-      controller: widget.controller,
-      itemBuilder: (BuildContext context, int index) {
-        return _buildRow(index);
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -94,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
         alignment: Alignment.topRight,
         children: <Widget>[
           CustomScrollBar(
-            child: _listView,
             scrollBarHeight: 35.0,
             controller: widget.controller,
           ),
@@ -105,28 +75,69 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class CustomScrollBar extends StatefulWidget {
-  final ListView child;
   final double scrollBarHeight;
   final ScrollController controller;
 
-  CustomScrollBar({this.child, this.scrollBarHeight, this.controller});
+  CustomScrollBar({this.scrollBarHeight, this.controller});
 
   @override
   State createState() => new CustomScrollBarState();
 }
 
 class CustomScrollBarState extends State<CustomScrollBar> {
+  double get _viewPortDimension => context.size.height;
   bool _isDragInProcess = false;
   double get _minScrollBarOffset => 0.0;
-  double get _maxScrollBarOffset =>
-      context.size.height - widget.scrollBarHeight;
-  double get _minScrollExtent => 0.0;
-  double get _maxScrollExtent => widget.controller.position.maxScrollExtent;
+  double get _maxScrollBarOffset => _viewPortDimension - widget.scrollBarHeight;
+  double _minScrollExtent = 0.0;
+  double _maxScrollExtent = 0.0;
   double _scrollBarOffset = 0.0;
   double _listViewOffset = 0.0;
+  int _nOfChildren = 0;
+  double _childHeight = 20.0;
+
+  ListView _listView;
+
+  @override
+  void initState() {
+    _listView = _buildList();
+
+    //print("_listView.controller: " + _listView.controller.toString() + "\n");
+    //print("_listView.controller.position: " + _listView.controller.position.toString() + "\n");
+
+    //print("My home page context height: " + context.size.height.toString() + "\n");
+    super.initState();
+  }
+
+  Widget _buildRow(int index) {
+    return Container(
+      height: 20.0,
+      child: Text("item " + index.toString()),
+    );
+  }
+
+  Widget _buildList() {
+    //print("context height: " + context.size.height.toString() + "\n");
+    return ListView.builder(
+      controller: widget.controller,
+      itemBuilder: (BuildContext context, int index) {
+        _nOfChildren = max(_nOfChildren, index);
+        _maxScrollExtent = _nOfChildren * _childHeight - 560.0; //_viewPortDimension;
+        return _buildRow(index);
+      },
+    );
+  }
+
+  int max(int a, int b) {
+    if (a > b) return a;
+    return b;
+  }
 
   // called when the scrollbar has been dragged
   _onVerticalDragUpdate(DragUpdateDetails details) {
+    print("_maxScrollExtent: " + _maxScrollExtent.toString() + "\n\n");
+    print("_listViewOffset: " + _listViewOffset.toString() + "\n\n");
+
     // update the scroll bar offset according to the drag
     _scrollBarOffset += details.delta.dy;
 
@@ -190,7 +201,7 @@ class CustomScrollBarState extends State<CustomScrollBar> {
           _onNotification(notification);
         },
         child: Stack(alignment: Alignment.topRight, children: <Widget>[
-          widget.child,
+          _listView,
           GestureDetector(
               onVerticalDragUpdate: _onVerticalDragUpdate,
               onVerticalDragStart: _onVerticalDragStart,
