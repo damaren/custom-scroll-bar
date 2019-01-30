@@ -85,7 +85,7 @@ class CustomScrollBar extends StatefulWidget {
 }
 
 class CustomScrollBarState extends State<CustomScrollBar> {
-  double get _viewPortDimension => context.size.height;
+  double get _viewPortDimension => widget.controller.position.viewportDimension;
   bool _isDragInProcess = false;
   double get _minScrollBarOffset => 0.0;
   double get _maxScrollBarOffset => _viewPortDimension - widget.scrollBarHeight;
@@ -111,7 +111,7 @@ class CustomScrollBarState extends State<CustomScrollBar> {
 
   Widget _buildRow(int index) {
     return Container(
-      height: 20.0,
+      height: _childHeight,
       child: Text("item " + index.toString()),
     );
   }
@@ -122,7 +122,7 @@ class CustomScrollBarState extends State<CustomScrollBar> {
       controller: widget.controller,
       itemBuilder: (BuildContext context, int index) {
         _nOfChildren = max(_nOfChildren, index);
-        _maxScrollExtent = _nOfChildren * _childHeight - 560.0; //_viewPortDimension;
+        _maxScrollExtent = _nOfChildren * _childHeight - _viewPortDimension;
         return _buildRow(index);
       },
     );
