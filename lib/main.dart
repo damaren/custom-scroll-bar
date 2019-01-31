@@ -47,6 +47,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  double _childHeight = 20.0;
+
+  Widget _buildRow(int index) {
+    return Container(
+      height: _childHeight,
+      child: Text("item " + index.toString()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -67,6 +77,8 @@ class _MyHomePageState extends State<MyHomePage> {
           CustomScrollBar(
             scrollBarHeight: 35.0,
             controller: widget.controller,
+            childHeight: _childHeight,
+            buildRow: _buildRow,
           ),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -77,8 +89,10 @@ class _MyHomePageState extends State<MyHomePage> {
 class CustomScrollBar extends StatefulWidget {
   final double scrollBarHeight;
   final ScrollController controller;
+  final double childHeight;
+  final Function buildRow;
 
-  CustomScrollBar({this.scrollBarHeight, this.controller});
+  CustomScrollBar({this.scrollBarHeight, this.controller, this.childHeight, this.buildRow});
 
   @override
   State createState() => new CustomScrollBarState();
@@ -109,13 +123,6 @@ class CustomScrollBarState extends State<CustomScrollBar> {
     super.initState();
   }
 
-  Widget _buildRow(int index) {
-    return Container(
-      height: _childHeight,
-      child: Text("item " + index.toString()),
-    );
-  }
-
   Widget _buildList() {
     //print("context height: " + context.size.height.toString() + "\n");
     return ListView.builder(
@@ -123,7 +130,7 @@ class CustomScrollBarState extends State<CustomScrollBar> {
       itemBuilder: (BuildContext context, int index) {
         _nOfChildren = max(_nOfChildren, index);
         _maxScrollExtent = _nOfChildren * _childHeight - _viewPortDimension;
-        return _buildRow(index);
+        return widget.buildRow(index);
       },
     );
   }
