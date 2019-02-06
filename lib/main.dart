@@ -47,7 +47,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   double _childHeight = 20.0;
 
   Widget _buildRow(int index) {
@@ -71,16 +70,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Stack(
-        alignment: Alignment.topRight,
-        children: <Widget>[
-          CustomScrollBar(
-            scrollBarHeight: 35.0,
-            controller: widget.controller,
-            childHeight: _childHeight,
-            buildRow: _buildRow,
-          ),
-        ],
+      body: Container(
+        child: CustomScrollBar(
+          scrollBarHeight: 35.0,
+          controller: widget.controller,
+          childHeight: _childHeight,
+          buildRow: _buildRow,
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
@@ -92,7 +88,8 @@ class CustomScrollBar extends StatefulWidget {
   final double childHeight;
   final Function buildRow;
 
-  CustomScrollBar({this.scrollBarHeight, this.controller, this.childHeight, this.buildRow});
+  CustomScrollBar(
+      {this.scrollBarHeight, this.controller, this.childHeight, this.buildRow});
 
   @override
   State createState() => new CustomScrollBarState();
