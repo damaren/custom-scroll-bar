@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'listItem.dart';
 import 'content.dart';
+import 'customScrollBar.dart';
 
 void main() => runApp(MyApp());
 
 ScrollController controller = ScrollController();
 
 class MyApp extends StatelessWidget {
-
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -25,8 +24,7 @@ class MyApp extends StatelessWidget {
         // counter didn't reset back to zero; the application is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(
-          title: 'Custom Scrollbar test app'),
+      home: MyHomePage(title: 'Custom Scrollbar test app'),
     );
   }
 }
@@ -52,10 +50,25 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double _childHeight = 50.0;
 
-  Widget _buildRow(int index) {
-    Content content = Content("Content " + index.toString(), "Description " + index.toString(), false);
-    return ListItem(content, _childHeight);
+  List<Content> contentList = [];
+
+  _buildRow(int index) {
+    if(index>=contentList.length) {
+      Content content = Content("Content " + index.toString(),
+          "Description " + index.toString(), false);
+      contentList.add(content);
+      return ListItem(contentList[index], _childHeight);
+    }
+    else {
+      return ListItem(contentList[index], _childHeight);
+    }
   }
+
+//  Widget _buildRow(int index) {
+//    Content content = Content("Content " + index.toString(),
+//        "Description " + index.toString(), false);
+//    return ListItem(content, _childHeight);
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +86,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Container(
         child: CustomScrollBar(
-          scrollBarHeight: 35.0,
           childHeight: _childHeight,
           buildRow: _buildRow,
         ),
@@ -82,141 +94,4 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class CustomScrollBar extends StatefulWidget {
-  final double scrollBarHeight;
-  final double childHeight;
-  final Function buildRow;
 
-  CustomScrollBar(
-      {this.scrollBarHeight, this.childHeight, this.buildRow});
-
-  @override
-  State createState() => new CustomScrollBarState();
-}
-
-class CustomScrollBarState extends State<CustomScrollBar> {
-  ScrollController _controller = ScrollController();
-  double get _viewPortDimension => _controller.position.viewportDimension;
-  bool _isDragInProcess = false;
-  double get _minScrollBarOffset => 0.0;
-  double get _maxScrollBarOffset => _viewPortDimension - widget.scrollBarHeight;
-  double _minScrollExtent = 0.0;
-  double _maxScrollExtent = 0.0;
-  double _scrollBarOffset = 0.0;
-  double _listViewOffset = 0.0;
-  int _nOfChildren = 0;
-  double get _childHeight => widget.childHeight;
-
-  ListView _listView;
-
-  @override
-  void initState() {
-    _listView = _buildList();
-
-    //print("_listView.controller: " + _listView.controller.toString() + "\n");
-    //print("_listView.controller.position: " + _listView.controller.position.toString() + "\n");
-
-    //print("My home page context height: " + context.size.height.toString() + "\n");
-    super.initState();
-  }
-
-  Widget _buildList() {
-    //print("context height: " + context.size.height.toString() + "\n");
-    return ListView.builder(
-      controller: _controller,
-      itemBuilder: (BuildContext context, int index) {
-        _nOfChildren = max(_nOfChildren, index);
-        _maxScrollExtent = _nOfChildren * _childHeight - _viewPortDimension;
-        return widget.buildRow(index);
-      },
-    );
-  }
-
-  int max(int a, int b) {
-    if (a > b) return a;
-    return b;
-  }
-
-  // called when the scrollbar has been dragged
-  _onVerticalDragUpdate(DragUpdateDetails details) {
-    print("_maxScrollExtent: " + _maxScrollExtent.toString() + "\n\n");
-    print("_listViewOffset: " + _listViewOffset.toString() + "\n\n");
-
-    // update the scroll bar offset according to the drag
-    _scrollBarOffset += details.delta.dy;
-
-    // don't allow the scroll bar offset to be outside the limits
-    if (_scrollBarOffset < _minScrollBarOffset) {
-      _scrollBarOffset = _minScrollBarOffset;
-    }
-    if (_scrollBarOffset > _maxScrollBarOffset) {
-      _scrollBarOffset = _maxScrollBarOffset;
-    }
-
-    // calculate the list view offset according to the formula (listViewOffset/masScrollExtent=scrollBarOffset/maxScrollBarOffset)
-    _listViewOffset =
-        (_scrollBarOffset * _maxScrollExtent) / _maxScrollBarOffset;
-
-    // update the list view's position
-    _controller.position.jumpTo(_listViewOffset);
-
-    setState(() {});
-  }
-
-  // called when the listview has been scrolled
-  _onNotification(ScrollNotification notification) {
-    // dragging the scrollbar will trigger a movement in the listview, and thus _onNotification will be called. In that case, _onNotification should return without doing anything.
-    if (_isDragInProcess) {
-      return;
-    }
-
-    setState(() {
-      if (notification is ScrollUpdateNotification) {
-        // update the list view offset according to the scroll
-        _listViewOffset += notification.scrollDelta;
-
-        // dont't allow the list view offset to be outside the limits
-        if (_listViewOffset < _minScrollExtent) {
-          _listViewOffset = _minScrollExtent;
-        }
-        if (_listViewOffset > _maxScrollExtent) {
-          _listViewOffset = _maxScrollExtent;
-        }
-
-        // calculate the scroll bar offset according to the formula (listViewOffset/masScrollExtent=scrollBarOffset/maxScrollBarOffset)
-        _scrollBarOffset =
-            (_listViewOffset * _maxScrollBarOffset) / _maxScrollExtent;
-      }
-    });
-  }
-
-  _onVerticalDragStart(DragStartDetails details) {
-    _isDragInProcess = true;
-  }
-
-  _onVerticalDragEnd(DragEndDetails details) {
-    _isDragInProcess = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          _onNotification(notification);
-        },
-        child: Stack(alignment: Alignment.topRight, children: <Widget>[
-          _listView,
-          GestureDetector(
-              onVerticalDragUpdate: _onVerticalDragUpdate,
-              onVerticalDragStart: _onVerticalDragStart,
-              onVerticalDragEnd: _onVerticalDragEnd,
-              child: Container(
-                color: Colors.red,
-                height: widget.scrollBarHeight,
-                width: 12.0,
-                margin: EdgeInsets.only(top: _scrollBarOffset),
-                padding: EdgeInsets.only(left: 5.0),
-              )),
-        ]));
-  }
-}

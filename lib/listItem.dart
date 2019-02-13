@@ -22,7 +22,12 @@ class ListItem extends StatelessWidget {
             height: height,
             child: Text(content.getTitle()),
           ),
-          Container(child: Text(content.checked.toString())),
+          Container(
+              child: Text(
+            content.checked.toString(),
+            style:
+                TextStyle(color: content.checked ? Colors.green : Colors.red),
+          )),
         ]));
   }
 }
