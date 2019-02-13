@@ -11,8 +11,10 @@ class ContentDetails extends StatefulWidget {
 }
 
 class ContentDetailsState extends State<ContentDetails> {
+
   @override
-  void initSate() {}
+  void initSate() {
+  }
 
   @override
   Widget build(BuildContext context) {

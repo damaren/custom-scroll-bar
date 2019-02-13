@@ -22,7 +22,16 @@ class ListItem extends StatelessWidget {
             height: height,
             child: Text(content.getTitle()),
           ),
-          Container(child: Text(content.checked.toString())),
+          Container(
+              child: Icon(
+            Icons.check_box,
+            color: content.checked ? Colors.green : Colors.red,
+          )),
+//              child: Text(
+//            "bool checked",
+//            style:
+//                TextStyle(color: content.checked ? Colors.green : Colors.red),
+//          )),
         ]));
   }
 }
